@@ -1,7 +1,7 @@
 import logging
 import os
 import sqlite3 as sqlite
-
+## 助教学长写的创建数据库的方法
 
 class Store:
     database: str

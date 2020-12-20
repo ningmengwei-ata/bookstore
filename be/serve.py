@@ -6,7 +6,8 @@ from flask import request
 from be.view import auth
 from be.view import seller
 from be.view import buyer
-from be.model.store import init_database
+from be.init_db import init_database
+# from be.model.store import init_database
 
 bp_shutdown = Blueprint("shutdown", __name__)
 
