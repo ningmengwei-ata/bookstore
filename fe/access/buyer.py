@@ -40,3 +40,50 @@ class Buyer:
         headers = {"token": self.token}
         r = requests.post(url, headers=headers, json=json)
         return r.status_code
+    
+    def receive_book(self,buyer_id: str, order_id: str) -> int:
+        json={
+            "user_id":buyer_id,
+            "order_id":order_id
+        }
+        url = urljoin(self.url_prefix, "receive_book")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+    def search_history_status(self,buyer_id: str,flag:int):
+        json = {
+            "buyer_id": buyer_id,
+            "flag":flag
+        }
+        url = urljoin(self.url_prefix, "search_history_status")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code
+    def cancel(self,buyer_id: str, order_id: str):
+        json = {
+            "buyer_id": buyer_id,
+            "order_id": order_id
+        }
+        url = urljoin(self.url_prefix, "cancel")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        return r.status_code 
+    
+    def auto_cancel(self,order_id:str):
+        json={"order_id":order_id}
+        url=urljoin(self.url_prefix,"test_auto_cancel")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        response_json = r.json()
+        return r.status_code
+
+    def search_functions_limit(self,store_id:str,search_type:str,search_input:str,field:str)->(int, [dict]):
+        json = {"store_id": store_id, 
+        "search_type": search_type,
+        "search_input":search_input,
+        "field":field}
+        url=urljoin(self.url_prefix,"search_functions_limit")
+        headers = {"token": self.token}
+        r = requests.post(url, headers=headers, json=json)
+        response_json = r.json()
+        return r.status_code,response_json.get("[res]")#test

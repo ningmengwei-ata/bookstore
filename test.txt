@@ -1,0 +1,103 @@
+text
+add_order
+用户和店铺是否存在
+if not self.user_id_exist(user_id):
+                return error.error_non_exist_user_id(user_id) + (order_id, )
+            if not self.store_id_exist(store_id):
+                return error.error_non_exist_store_id(store_id) + (order_id, )
+
+减库存，如果取消订单的话要加回来（已经在下单时减掉了库存）
+添加订单详细情况
+new_order_info = New_order_detail(order_id=uid, book_id=book_id, count=count, price=price)
+                self.session.add(new_order_info)
+添加未支付订单
+new_order_unpaid = New_order_unpaid(order_id=uid, store_id=store_id,buyer_id=user_id,price=price,commit_time=timenow)
+            self.session.add(new_order_unpaid)
+            self.session.commit()
+            self.session.close()
+
+payment
+查询是否有该订单
+row=self.session.query(New_order_unpaid).filter_by(order_id=order_id).first()
+            print(row)
+            if row is None:
+                return error.error_invalid_order_id(order_id)
+
+用户登录是否正确，只能自己付自己的订单
+if buyer_id != user_id:
+                return error.error_authorization_fail()
+检查库存？
+
+查找该用户是否存在
+row=self.session.query(Users).filter_by(user_id=buyer_id).first()
+            
+            if row is None:
+                return error.error_non_exist_user_id(buyer_id)
+
+店铺是否存在
+row=self.session.query(User_store).filter_by(store_id=store_id).first()
+            if row is None:
+                return error.error_non_exist_store_id(store_id)
+
+卖家是否存在
+seller_id=row.user_id
+
+            if not self.user_id_exist(seller_id):
+                return error.error_non_exist_user_id(seller_id)
+
+添加订单详情
+cursor = self.session.query(New_order_detail).filter_by(order_id=order_id)
+            total_price = 0
+            for row in cursor.all():
+                count = row.count
+                price = row.price
+                total_price = total_price + price * count
+
+#买家支付 余额扣钱
+            cursor = self.session.query(Users).filter(Users.user_id==buyer_id, Users.balance>=total_price)
+            rowcount = cursor.update({Users.balance: Users.balance - total_price})
+            if rowcount == 0:
+                return error.error_not_sufficient_funds(order_id)
+#卖家加钱
+            cursor = self.session.query(Users).filter(Users.user_id==seller_id)
+            rowcount = cursor.update({Users.balance: Users.balance + total_price})
+            if rowcount == 0:
+                return error.error_non_exist_user_id(seller_id)
+
+删除待支付订单
+query = self.session.query(New_order_unpaid).filter(New_order_unpaid.order_id == order_id)
+            query.delete()
+rowcount=query.first() 
+如果删除不成功
+if rowcount==0:
+                return error.error_invalid_order_id(order_id)
+
+#在待发货中加入该订单
+            timenow = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+            print("******")
+            new_orde = New_order_undelivered(
+                order_id=order_id,
+                buyer_id = buyer_id ,
+                store_id=store_id,
+                price=price,
+                purchase_time=timenow
+            )
+            self.session.add(new_orde)
+
+self.session.commit()
+
+测试发货
+
+新建卖家，买家
+新建店铺
+新建订单
+付款
+测试发货
+
+测试付款
+得到书的list
+注册买家
+新建订单
+
+
+

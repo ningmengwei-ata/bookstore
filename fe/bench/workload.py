@@ -7,6 +7,7 @@ from fe.access.new_seller import register_new_seller
 from fe.access.new_buyer import register_new_buyer
 from fe.access.buyer import Buyer
 from fe import conf
+logging.basicConfig(level=logging.INFO, filename='bench.log')
 
 
 class NewOrder:

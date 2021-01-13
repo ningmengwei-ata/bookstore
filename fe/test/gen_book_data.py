@@ -51,7 +51,6 @@ class GenBook:
             if low_stock_level:
                 buy_num = stock_level + 1
             self.buy_book_info_list.append((bk, buy_num))
-
         for item in self.buy_book_info_list:
             self.buy_book_id_list.append((item[0].id, item[1]))
         return ok, self.buy_book_id_list
