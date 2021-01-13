@@ -1,0 +1,48 @@
+Name                                    Stmts   Miss Branch BrPart  Cover   Missing
+-----------------------------------------------------------------------------------
+be/__init__.py                              0      0      0      0   100%
+be/app.py                                   8      8      2      0     0%   1-11
+be/model1/__init__.py                       0      0      0      0   100%
+be/model1/buyer.py                        281     27    102     12    88%   46->47, 47, 72->73, 73, 99->100, 100-101, 129->130, 130, 139->140, 140, 151->152, 152, 157->158, 158, 174->175, 175, 180->181, 181, 191->192, 192, 217-221, 242->243, 243, 247-250, 270->271, 271, 280-283, 390-391
+be/model1/db_conn.py                       30      0      6      0   100%
+be/model1/error.py                         23      3      0      0    87%   30, 42, 66
+be/model1/seller.py                        95     16     30      4    79%   112-115, 124->125, 125, 134->135, 135, 142->143, 143, 152-155, 176->177, 177, 200-203
+be/model1/store.py                         27      4      0      0    85%   45-47, 63
+be/model1/user.py                         129     24     38      6    77%   65, 81->84, 84-88, 96->exit, 98->exit, 100-102, 145->146, 146, 150-153, 172->173, 173, 177-180, 200->201, 201, 206-209
+be/serve.py                                37      1      2      1    95%   22->23, 23
+be/view1/__init__.py                        0      0      0      0   100%
+be/view1/auth.py                           42      0      0      0   100%
+be/view1/buyer.py                          82     13      2      0    85%   59-64, 68-74
+be/view1/seller.py                         39      0      0      0   100%
+fe/__init__.py                              0      0      0      0   100%
+fe/access/__init__.py                       0      0      0      0   100%
+fe/access/auth.py                          31      0      0      0   100%
+fe/access/book.py                          70      1     12      2    96%   36->37, 37, 85->84
+fe/access/buyer.py                         61      0      2      0   100%
+fe/access/new_buyer.py                      8      0      0      0   100%
+fe/access/new_seller.py                     8      0      0      0   100%
+fe/access/seller.py                        37      0      0      0   100%
+fe/bench/__init__.py                        0      0      0      0   100%
+fe/bench/run.py                            13      0      6      0   100%
+fe/bench/session.py                        47      0     12      1    98%   38->42
+fe/bench/workload.py                      125      1     22      2    98%   43->45, 90->91, 91
+fe/conf.py                                 11      0      0      0   100%
+fe/conftest.py                             17      0      0      0   100%
+fe/test/gen_book_data.py                   48      0     16      0   100%
+fe/test/test_add_book.py                   36      0     10      0   100%
+fe/test/test_add_funds.py                  23      0      0      0   100%
+fe/test/test_add_stock_level.py            39      0     10      0   100%
+fe/test/test_bench.py                       6      2      0      0    67%   7-8
+fe/test/test_cancel.py                     49      0      2      0   100%
+fe/test/test_create_store.py               20      0      0      0   100%
+fe/test/test_deliver_book.py               64      1      4      1    97%   47->48, 48
+fe/test/test_login.py                      28      0      0      0   100%
+fe/test/test_new_order.py                  40      0      0      0   100%
+fe/test/test_password.py                   33      0      0      0   100%
+fe/test/test_payment.py                    60      1      4      1    97%   38->39, 39
+fe/test/test_receive_book.py               70      1      4      1    97%   47->48, 48
+fe/test/test_register.py                   35      0      0      0   100%
+fe/test/test_search_functions.py           52      0      0      0   100%
+fe/test/test_search_history_status.py      76      0      8      0   100%
+-----------------------------------------------------------------------------------
+TOTAL                                    1900    103    294     31    93%

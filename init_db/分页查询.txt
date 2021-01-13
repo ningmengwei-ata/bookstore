@@ -1,0 +1,74 @@
+1. PostgreSQL两种分页方法查询时间比较
+https://blog.csdn.net/qq924862077/article/details/48710247
+
+2.分页查询优化
+- 基础分页查询方法
+一般性分页 使用 limit [offset,] rows 偏移量的问题在于如下两种：
+如果偏移量固定，返回记录量对执行时间有什么影响？
+select * from user limit 10000,1;
+select * from user limit 10000,10;
+select * from user limit 10000,100;
+select * from user limit 10000,1000;
+select * from user limit 10000,10000;
+
+（这种分页查询机制，每次都会从数据库第一条记录开始扫描，越往后查询越慢，而 且查询的数据越多，也会拖慢总查询速度。）
+
+作者：190coder
+链接：https://juejin.cn/post/6861786774424059917
+- 优化的分页查询方法
+分页优化方案
+
+利用覆盖索引优化
+select * from user limit 10000,100;
+select id from user limit 10000,100;
+利用子查询优化
+select * from user limit 10000,100;
+select * from user where id>= (select id from user limit 10000,1) limit 100;(使用了索引id做主键比较(id>=)，并且子查询使用了覆盖索引进行优化。)
+
+- 陈诺的分页查询方法
+即是使用search_id 进行覆盖索引的优化，这种search_id的优化的弊端他其实在项目里也写了：
+缺点：
+仅对全站查询有效，店铺内搜索时仍然需要使用limit（店铺不可能包含所有符合要求的书，如果强行使用会造成部分页面内容缺失，大大影响用户体验），好在用户的大部分搜索都为全站搜索，而且店铺内符合条件的书也不会太多，使用limit也在数据库可以承受的范围内。
+删除书本代价较高，试想如果我们删除了book表中的某一本书，除了要删除所有search表中的对应项外，排在其之后的都要向前移动。
+但一般不会删除一本书，除非这本书带来的社会影响十分恶劣。如果非要删除，我们可以通过定期更新所有search表，用户访问已删除书本，时提示书本不存在（用户仍然可以搜索到该书），
+而且如果search_id是根据热度排序的，那么定期更新所有的search表也是需要的，此时可以将被删除的书本从search表中删除。
+跟下面这个链接讨论的一样，就是search_id的时效性
+https://blog.csdn.net/qq924862077/article/details/48710247
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+EXPLAIN ANALYZE SELECT DISTINCT book_id FROM search_book_intro WHERE book_id in (SELECT book_id FROM search_book_intro WHERE tsv_column @@ '美丽') LIMIT 100
+- 在本次project中我使用的分页查询：
+Limit  (cost=4719.78..4720.78 rows=100 width=4) (actual time=36.313..36.343 rows=100 loops=1)
+  ->  HashAggregate  (cost=4719.78..4737.73 rows=1795 width=4) (actual time=36.312..36.331 rows=100 loops=1)
+        Group Key: search_book_intro.book_id
+        Batches: 1  Memory Usage: 73kB
+        ->  Hash Join  (cost=341.50..4715.30 rows=1795 width=4) (actual time=1.014..35.925 rows=1976 loops=1)
+              Hash Cond: (search_book_intro.book_id = search_book_intro_1.book_id)
+              ->  Seq Scan on search_book_intro  (cost=0.00..3925.55 rows=163155 width=4) (actual time=0.649..15.253 rows=163155 loops=1)
+              ->  Hash  (cost=340.28..340.28 rows=97 width=4) (actual time=0.232..0.234 rows=104 loops=1)
+                    Buckets: 1024  Batches: 1  Memory Usage: 12kB
+                    ->  HashAggregate  (cost=339.31..340.28 rows=97 width=4) (actual time=0.200..0.215 rows=104 loops=1)
+                          Group Key: search_book_intro_1.book_id
+                          Batches: 1  Memory Usage: 24kB
+                          ->  Bitmap Heap Scan on search_book_intro search_book_intro_1  (cost=12.76..339.07 rows=98 width=4) (actual time=0.063..0.171 rows=104 loops=1)
+                                Recheck Cond: (tsv_column @@ '''美丽'''::tsquery)
+                                Heap Blocks: exact=100
+                                ->  Bitmap Index Scan on idx_gin_zh  (cost=0.00..12.73 rows=98 width=0) (actual time=0.045..0.045 rows=104 loops=1)
+                                      Index Cond: (tsv_column @@ '''美丽'''::tsquery)
+Planning Time: 0.223 ms
+Execution Time: 36.407 ms
+
+---------------------------------------------------------------------------------------------------------------------------------------------------------
+EXPLAIN ANALYZE SELECT DISTINCT book_id FROM search_book_intro  WHERE tsv_column @@ '美丽' LIMIT 100
+
+Limit  (cost=342.31..342.80 rows=97 width=4) (actual time=0.294..0.356 rows=100 loops=1)
+  ->  Unique  (cost=342.31..342.80 rows=97 width=4) (actual time=0.293..0.341 rows=100 loops=1)
+        ->  Sort  (cost=342.31..342.55 rows=98 width=4) (actual time=0.293..0.304 rows=100 loops=1)
+              Sort Key: book_id
+              Sort Method: quicksort  Memory: 29kB
+              ->  Bitmap Heap Scan on search_book_intro  (cost=12.76..339.07 rows=98 width=4) (actual time=0.041..0.262 rows=104 loops=1)
+                    Recheck Cond: (tsv_column @@ '''美丽'''::tsquery)
+                    Heap Blocks: exact=100
+                    ->  Bitmap Index Scan on idx_gin_zh  (cost=0.00..12.73 rows=98 width=0) (actual time=0.028..0.028 rows=104 loops=1)
+                          Index Cond: (tsv_column @@ '''美丽'''::tsquery)
+Planning Time: 0.128 ms
+Execution Time: 0.400 ms

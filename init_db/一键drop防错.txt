@@ -1,0 +1,9 @@
+ drop table book cascade;
+ drop table book_images ;
+ drop table search_author ;
+ drop table search_book_intro ;
+ drop table search_book_tags ;
+ drop table search_title ;
+ 亲测可以的，具体数据去Navicat可视化查看！
+ GRANT ALL PRIVILEGES ON all tables in schema public TO postgres;//不加这个我的postman测试会爆错
+ drop一次就要grant一次【cxn

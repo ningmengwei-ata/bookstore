@@ -16,7 +16,7 @@ class TestLogin:
         self.terminal = "terminal_" + self.user_id
         assert self.auth.register(self.user_id, self.password) == 200
         yield
-
+    
     def test_ok(self):
         code, token = self.auth.login(self.user_id, self.password, self.terminal)
         assert code == 200
